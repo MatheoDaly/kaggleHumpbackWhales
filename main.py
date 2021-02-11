@@ -71,8 +71,9 @@ def prepareImages(data, m, dataset, image_size=200):
             # Noir et blanc, et enregistrement
             img = ImageOps.grayscale(img)
 
-            # Enregistrement dans X_train
 
+            # Enregistrement dans X_train
+            img = keras.applications.resnet.preprocess_input(img)
             X_train[count] = img
 
             # Suivi
