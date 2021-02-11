@@ -22,6 +22,7 @@ PATH = "test"
 # load the training data
 trainData = pd.read_csv(PATH + "/train.csv")
 
+
 def zoom_at(img, zoom, x=100, y=100):
     w, h = img.size
     size = (200, 200)
@@ -164,9 +165,8 @@ opt = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=0.0000001, deca
 mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 print("NEURAL NETWORK INITIALIZED")
 
-
 history = mod.fit(X_train, Y_train_onehot, epochs=100, batch_size=100, verbose=1)
-keras.models.load_model(PATH+"/models/model.h5")
+keras.models.load_model(PATH + "/models/model.h5")
 print("NEURAL NETWORK TRAINED")
 # open test data
 test = os.listdir(PATH + "/test/")

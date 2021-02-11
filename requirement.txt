@@ -1,8 +1,5 @@
 numpy
 pandas
-os
-gc
-random
 IPython
 sklearn
 keras
