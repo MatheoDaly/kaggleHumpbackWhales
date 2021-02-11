@@ -42,37 +42,31 @@ def prepareImages(data, m, dataset, image_size=200):
     for fig in tqdm(data['Image']):
         if count < m:
             # load images
-            img = cv2.imread(dataset + "/" + fig)
-
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = Image.open(dataset + "/" + fig)
 
             ## FILTRES
 
-            # Flou bilateral avec d=20, deux passages
-            img = cv2.bilateralFilter(img, 20, 100, 100)
-            img = cv2.bilateralFilter(img, 20, 100, 100)
-            img = Image.fromarray(img)
-            # A partir d'ici on passe d'images cv2 a PIL
-
             # Resize
-            img = img.resize((200, 200))
-            # Netted
+            img = img.resize((200,200))
+            # Flou bilatéral
+            img = img.filter(ImageFilter.SMOOTH)
+            # Netteté
             img = img.filter(ImageFilter.SHARPEN)
-            # Embossed
+            # Embossage
             img = img.filter(ImageFilter.EMBOSS)
-            # Netted
+            # Netteté
             img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=130, threshold=2))
 
-            ## DATA AUGMENTATION
+            # ## DATA AUGMENTATION
 
-            # Zoom aleatory
-            zoom_size = np.random.uniform(0.8, 1.2)
-            img = zoom_at(img, zoom_size)
+            # # Zoom aleatory
+            # zoom_size = np.random.uniform(0.8, 1.2)
+            # img = zoom_at(img, zoom_size)
 
-            # Rotation aleatory
-            angle = random.randint(-20, 20)
-            img = img.rotate(angle, fillcolor='grey')
-            img = img.filter(ImageFilter.SHARPEN)
+            # # Rotation aleatory
+            # angle = random.randint(-20, 20)
+            # img = img.rotate(angle, fillcolor='grey')
+            # img = img.filter(ImageFilter.SHARPEN)
 
             # Noir et blanc, et enregistrement
             img = ImageOps.grayscale(img)
