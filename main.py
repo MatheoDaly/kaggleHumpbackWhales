@@ -47,7 +47,7 @@ def prepareImages(data, m, dataset, image_size=200):
 
             ## FILTRES
 
-            # Flou bilatéral avec d=20, deux passages
+            # Flou bilateral avec d=20, deux passages
             img = cv2.bilateralFilter(img, 20, 100, 100)
             img = cv2.bilateralFilter(img, 20, 100, 100)
             img = Image.fromarray(img)
@@ -55,20 +55,20 @@ def prepareImages(data, m, dataset, image_size=200):
 
             # Resize
             img = img.resize((200, 200))
-            # Netteté
+            # Netted
             img = img.filter(ImageFilter.SHARPEN)
-            # Embossage
+            # Embossed
             img = img.filter(ImageFilter.EMBOSS)
-            # Netteté
+            # Netted
             img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=130, threshold=2))
 
             ## DATA AUGMENTATION
 
-            # Zoom aléatoire
+            # Zoom aleatory
             zoom_size = np.random.uniform(0.8, 1.2)
             img = zoom_at(img, zoom_size)
 
-            # Rotation aléatoire
+            # Rotation aleatory
             angle = random.randint(-20, 20)
             img = img.rotate(angle, fillcolor='grey')
             img = img.filter(ImageFilter.SHARPEN)
@@ -114,7 +114,7 @@ def prepareY2(Y):
     return y, label_encoder
 
 
-# Première initialisation des Y et des X
+# Premiere initialisation des Y et des X
 Y = trainData['Id']
 y_onehot, label_encoder = prepareY(Y)
 y_integer, label_encoder = prepareY2(Y)
@@ -128,13 +128,13 @@ X_train = np.repeat(X_train[..., np.newaxis], 3, -1)
 print("INIT X_TRAIN AND Y_TRAIN")
 # BOUCLE
 for i in tqdm(range(9)):
-    # Préparation des images
+    # Preparation des images
     X = prepareImages(trainData, 9850, PATH + "/train")
     X = np.repeat(X[..., np.newaxis], 3, -1)
-    # Concaténation des images
+    # Concatenation des images
     X_train = np.concatenate((X_train, X))
 
-    # Concaténation des Y
+    # Concatenation des Y
     Y_train_onehot = np.concatenate((Y_train_onehot, y_onehot))
     Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
