@@ -17,7 +17,7 @@ from keras import optimizers
 from PIL import Image, ImageFilter, ImageOps
 import cv2
 
-PATH = "test"
+PATH = "/home/data/challenge_deep/"
 
 # load the training data
 trainData = pd.read_csv(PATH + "/train.csv")
@@ -123,7 +123,7 @@ y_integer, label_encoder = prepareY2(Y)
 Y_train_onehot = y_onehot
 Y_train_integer = y_integer
 
-X_train = prepareImages(trainData, 100, PATH + "/train")
+X_train = prepareImages(trainData, 9850, PATH + "/train")
 
 X_train = np.repeat(X_train[..., np.newaxis], 3, -1)
 print("INIT X_TRAIN AND Y_TRAIN")
@@ -157,7 +157,7 @@ mod = keras.layers.AveragePooling2D((1, 1), name='out_avg_pool')(mod)
 mod = keras.layers.Flatten()(mod)
 mod = keras.layers.Dense(500, activation="relu", name='out_relu')(mod)
 mod = keras.layers.Dropout(0.8)(mod)
-mod = keras.layers.Dense(91, activation='softmax', name='out_softmax')(mod)
+mod = keras.layers.Dense(4251, activation='softmax', name='out_softmax')(mod)
 
 mod = Model(inputs=baseModel.input, outputs=mod)
 opt = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=0.0000001, decay=0.0, amsgrad=False)
