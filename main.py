@@ -140,8 +140,16 @@ print("INIT X_TRAIN AND Y_TRAIN")
 #    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
+
 baseModel = keras.applications.ResNet50(weights="imagenet", include_top=False,
                                         input_tensor=keras.layers.Input(shape=(200, 200, 3)))
+
+baseModel = keras.applications.VGG16(
+    include_top=False,
+    weights="imagenet",
+    input_tensor=keras.layers.Input(shape=(200, 200, 3))
+)
+
 for layer in baseModel.layers:
     layer.trainable = False
 mod = baseModel.output
