@@ -57,16 +57,16 @@ def prepareImages(data, m, dataset, image_size=200):
             # Netteté
             img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=130, threshold=2))
 
-            ## DATA AUGMENTATION
+            # ## DATA AUGMENTATION
 
-            # Zoom aleatory
-            zoom_size = np.random.uniform(0.8, 1.2)
-            img = zoom_at(img, zoom_size)
+            # # Zoom aleatory
+            # zoom_size = np.random.uniform(0.8, 1.2)
+            # img = zoom_at(img, zoom_size)
 
-            # Rotation aleatory
-            angle = random.randint(-20, 20)
-            img = img.rotate(angle, fillcolor='grey')
-            img = img.filter(ImageFilter.SHARPEN)
+            # # Rotation aleatory
+            # angle = random.randint(-20, 20)
+            # img = img.rotate(angle, fillcolor='grey')
+            # img = img.filter(ImageFilter.SHARPEN)
 
             # Noir et blanc, et enregistrement
             img = ImageOps.grayscale(img)
