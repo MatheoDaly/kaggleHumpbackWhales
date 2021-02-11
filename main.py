@@ -73,7 +73,7 @@ def prepareImages(data, m, dataset, image_size=200):
 
 
             # Enregistrement dans X_train
-            img = keras.applications.resnet.preprocess_input(img)
+            img = keras.applications.resnet.preprocess_input(np.array(img))
             X_train[count] = img
 
             # Suivi
