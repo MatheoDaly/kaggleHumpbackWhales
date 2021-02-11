@@ -3,14 +3,13 @@ import numpy as np
 import pandas as pd
 import os
 import gc
-import tensorflow as tf
 import random
 from numpy import array, argmax
 from IPython.display import Image
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from keras.layers import Input, Dense, Activation, BatchNormalization, Flatten, Conv2D, MaxPooling2D, AveragePooling2D, \
-    Dropout
+import keras
+
 from tqdm import tqdm
 from keras.models import Model
 from keras import optimizers
@@ -22,7 +21,6 @@ PATH = "test"
 
 # load the training data
 trainData = pd.read_csv(PATH + "/train.csv")
-
 
 def zoom_at(img, zoom, x=100, y=100):
     w, h = img.size
@@ -36,16 +34,15 @@ def zoom_at(img, zoom, x=100, y=100):
 
 
 def prepareImages(data, m, dataset, image_size=200):
-    print("Preparing images")
-
     X_train = np.zeros((m, image_size, image_size))
 
     count = 0
 
-    for fig in data['Image']:
+    for fig in tqdm(data['Image']):
         if count < m:
             # load images
             img = cv2.imread(dataset + "/" + fig)
+
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             ## FILTRES
@@ -80,16 +77,13 @@ def prepareImages(data, m, dataset, image_size=200):
             img = ImageOps.grayscale(img)
 
             # Enregistrement dans X_train
+
             X_train[count] = img
 
             # Suivi
-            if (count % 1000 == 0):
-                print("Processing image: ", count + 1, ", ", fig)
             count += 1
 
     count = 0
-
-    print("Finished!")
 
     return X_train
 
@@ -128,53 +122,51 @@ y_integer, label_encoder = prepareY2(Y)
 Y_train_onehot = y_onehot
 Y_train_integer = y_integer
 
-
-X_train = prepareImages(trainData[:100], 100, PATH + "/train")
-
+X_train = prepareImages(trainData, 100, PATH + "/train")
 
 X_train = np.repeat(X_train[..., np.newaxis], 3, -1)
 print("INIT X_TRAIN AND Y_TRAIN")
 # BOUCLE
 for i in tqdm(range(9)):
-
-
     # Préparation des images
     X = prepareImages(trainData, 9850, PATH + "/train")
     X = np.repeat(X[..., np.newaxis], 3, -1)
     # Concaténation des images
     X_train = np.concatenate((X_train, X))
 
-
     # Concaténation des Y
     Y_train_onehot = np.concatenate((Y_train_onehot, y_onehot))
     Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
-baseModel = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
-                                           input_tensor=Input(shape=(200, 200, 3)))
+baseModel = keras.applications.ResNet50(weights="imagenet", include_top=False,
+                                        input_tensor=keras.layers.Input(shape=(200, 200, 3)))
 for layer in baseModel.layers:
     layer.trainable = False
 mod = baseModel.output
 
-mod = BatchNormalization(axis=3, name='bn0')(mod)
-mod = Activation('relu')(mod)
+mod = keras.layers.BatchNormalization(axis=3, name='bn0')(mod)
+mod = keras.layers.Activation('relu')(mod)
 
-mod = MaxPooling2D((2, 2), name='max_pool')(mod)
-mod = Conv2D(64, (2, 2), strides=(1, 1), name="conv1")(mod)
-mod = Activation('relu')(mod)
-mod = AveragePooling2D((1, 1), name='avg_pool')(mod)
+mod = keras.layers.MaxPooling2D((2, 2), name='out_max_pool')(mod)
+mod = keras.layers.Conv2D(64, (2, 2), strides=(1, 1), name="out_conv1")(mod)
+mod = keras.layers.Activation('relu')(mod)
+mod = keras.layers.AveragePooling2D((1, 1), name='out_avg_pool')(mod)
 
-mod = Flatten()(mod)
-mod = Dense(500, activation="relu", name='rl')(mod)
-mod = Dropout(0.8)(mod)
-mod = Dense(4251, activation='softmax', name='sm')(mod)
+mod = keras.layers.Flatten()(mod)
+mod = keras.layers.Dense(500, activation="relu", name='out_relu')(mod)
+mod = keras.layers.Dropout(0.8)(mod)
+mod = keras.layers.Dense(91, activation='softmax', name='out_softmax')(mod)
 
 mod = Model(inputs=baseModel.input, outputs=mod)
-opt = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+opt = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=0.0000001, decay=0.0, amsgrad=False)
 
 mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 print("NEURAL NETWORK INITIALIZED")
-history = mod.fit(X_train, Y_train_onehot[:100], epochs=100, batch_size=100, verbose=1)
+
+
+history = mod.fit(X_train, Y_train_onehot, epochs=100, batch_size=100, verbose=1)
+keras.models.load_model(PATH+"/models/model.h5")
 print("NEURAL NETWORK TRAINED")
 # open test data
 test = os.listdir(PATH + "/test/")
