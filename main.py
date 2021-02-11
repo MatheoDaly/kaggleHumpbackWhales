@@ -51,7 +51,7 @@ def prepareImages(data, m, dataset, image_size=200):
             img = cv2.bilateralFilter(img, 20, 100, 100)
             img = cv2.bilateralFilter(img, 20, 100, 100)
             img = Image.fromarray(img)
-            # A partir d'ici on passe d'images cv2 à PIL
+            # A partir d'ici on passe d'images cv2 a PIL
 
             # Resize
             img = img.resize((200, 200))
