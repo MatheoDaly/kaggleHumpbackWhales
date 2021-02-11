@@ -4,4 +4,6 @@ IPython
 sklearn
 tensorflow
 tqdm
+Pillow
+opencv-python
 keras
