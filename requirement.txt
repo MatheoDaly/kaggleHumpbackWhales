@@ -6,4 +6,5 @@ tensorflow
 tqdm
 Pillow
 opencv-python
+tensorflow-gpu==2.2
 keras

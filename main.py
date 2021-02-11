@@ -17,7 +17,7 @@ from keras import optimizers
 from PIL import Image, ImageFilter, ImageOps
 import cv2
 
-PATH = "/home/data/challenge_deep/"
+PATH = "test"
 
 # load the training data
 trainData = pd.read_csv(PATH + "/train.csv")
