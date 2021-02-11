@@ -3,6 +3,9 @@ pandas
 IPython
 sklearn
 tqdm
+tensorboard<2.3.0,>=2.2.0
+tensorflow-estimator<2.3.0,>=2.2.0
+tensorflow<2.3.0,>=2.2.0
 Pillow
 opencv-python
 tensorflow-gpu==2.2
