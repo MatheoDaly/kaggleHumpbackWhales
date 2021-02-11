@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import os
 import gc
-import random
 from numpy import array, argmax
 from IPython.display import Image
 from sklearn.preprocessing import LabelEncoder
@@ -15,9 +14,9 @@ from keras.models import Model
 from keras import optimizers
 
 from PIL import Image, ImageFilter, ImageOps
-import cv2
 
-PATH = "test"
+
+PATH = "/home/data/challenge_deep"
 
 # load the training data
 trainData = pd.read_csv(PATH + "/train.csv")
