@@ -166,7 +166,7 @@ mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy']
 print("NEURAL NETWORK INITIALIZED")
 
 history = mod.fit(X_train, Y_train_onehot, epochs=100, batch_size=100, verbose=1)
-keras.models.load_model(PATH + "/models/model.h5")
+mod.save("model.hdf5")
 print("NEURAL NETWORK TRAINED")
 # open test data
 test = os.listdir(PATH + "/test/")
