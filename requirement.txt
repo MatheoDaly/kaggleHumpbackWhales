@@ -3,4 +3,5 @@ pandas
 IPython
 sklearn
 tensorflow
+tqdm
 keras
