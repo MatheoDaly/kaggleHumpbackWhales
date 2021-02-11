@@ -1,6 +1,4 @@
-import os
-
-# import the necessary libraries
+import csv
 import numpy as np
 import pandas as pd
 import os
@@ -11,10 +9,13 @@ from numpy import array, argmax
 from IPython.display import Image
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
-
+from keras.layers import Input, Dense, Activation, BatchNormalization, Flatten, Conv2D, MaxPooling2D, AveragePooling2D, \
+    Dropout
+from tqdm import tqdm
 from keras.models import Model
 from keras import optimizers
+
+from PIL import Image, ImageFilter, ImageOps
 import cv2
 
 PATH = "../"
@@ -126,41 +127,40 @@ y_integer, label_encoder = prepareY2(Y)
 
 Y_train_onehot = y_onehot
 Y_train_integer = y_integer
-print('init Y ok')
+
 
 X_train = prepareImages(trainData[:100], 100, PATH + "/train")
-print('init X ok')
 
 
 X_train = np.repeat(X_train[..., np.newaxis], 3, -1)
-
+print("INIT X_TRAIN AND Y_TRAIN")
 # BOUCLE
-for i in range(9) :
-    print('---- LOOP '+str(i))
+for i in tqdm(range(9)):
 
-     #Préparation des images
-    X = prepareImages(trainData, 9850,  PATH+"/train")
-    X = np.repeat(X_train[..., np.newaxis], 3, -1)
-     #Concaténation des images
+
+    # Préparation des images
+    X = prepareImages(trainData, 9850, PATH + "/train")
+    X = np.repeat(X[..., np.newaxis], 3, -1)
+    # Concaténation des images
     X_train = np.concatenate((X_train, X))
-    print('X OK')
 
-     #Concaténation des Y
+
+    # Concaténation des Y
     Y_train_onehot = np.concatenate((Y_train_onehot, y_onehot))
     Y_train_integer = np.concatenate((Y_train_integer, y_integer))
-    print('Y OK')
 
-
-baseModel = tf.keras.applications.ResNet50(weights="imagenet", include_top=False, input_tensor=Input(shape=(200, 200, 3)))
+print("X_TRAIN AND Y_TRAIN PROCESSED")
+baseModel = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
+                                           input_tensor=Input(shape=(200, 200, 3)))
 for layer in baseModel.layers:
-	layer.trainable = False
+    layer.trainable = False
 mod = baseModel.output
 
-mod = BatchNormalization(axis = 3, name = 'bn0')(mod)
+mod = BatchNormalization(axis=3, name='bn0')(mod)
 mod = Activation('relu')(mod)
 
 mod = MaxPooling2D((2, 2), name='max_pool')(mod)
-mod = Conv2D(64, (2, 2), strides = (1,1), name="conv1")(mod)
+mod = Conv2D(64, (2, 2), strides=(1, 1), name="conv1")(mod)
 mod = Activation('relu')(mod)
 mod = AveragePooling2D((1, 1), name='avg_pool')(mod)
 
@@ -173,14 +173,14 @@ mod = Model(inputs=baseModel.input, outputs=mod)
 opt = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+print("NEURAL NETWORK INITIALIZED")
 history = mod.fit(X_train, Y_train_onehot[:100], epochs=100, batch_size=100, verbose=1)
+print("NEURAL NETWORK TRAINED")
+# open test data
+test = os.listdir(PATH + "/test/")
 
-
-#open test data
-test = os.listdir(PATH+"/test/")
-print(len(test))
-
-#separate data into different DataFrames due to memory constraints
+print("BEGINNING TEST")
+# separate data into different DataFrames due to memory constraints
 col = ['Image']
 testData1 = pd.DataFrame(test[0:3899], columns=col)
 testData2 = pd.DataFrame(test[3900:7799], columns=col)
@@ -188,44 +188,44 @@ testData3 = pd.DataFrame(test[7800:11699], columns=col)
 testData4 = pd.DataFrame(test[11700:15609], columns=col)
 testData = pd.DataFrame(test, columns=col)
 
-#X_test = prepareImages(testData1, 15610, "test")
+# X_test = prepareImages(testData1, 15610, "test")
 gc.collect()
-X = prepareImages(testData1, 3900, PATH+"/test")
+X = prepareImages(testData1, 3900, PATH + "/test")
 X /= 255
 
 X = np.repeat(X[..., np.newaxis], 3, -1)
 predictions1 = mod.predict(np.array(X), verbose=1)
 gc.collect()
 
-X = prepareImages(testData2, 3900, PATH+"/test")
+X = prepareImages(testData2, 3900, PATH + "/test")
 X /= 255
 X = np.repeat(X[..., np.newaxis], 3, -1)
 predictions2 = mod.predict(np.array(X), verbose=1)
 gc.collect()
-X = prepareImages(testData3, 3900,  PATH+"/test")
+X = prepareImages(testData3, 3900, PATH + "/test")
 X /= 255
 X = np.repeat(X[..., np.newaxis], 3, -1)
 predictions3 = mod.predict(np.array(X), verbose=1)
 gc.collect()
-X = prepareImages(testData4, 3910, PATH+"/test")
+X = prepareImages(testData4, 3910, PATH + "/test")
 X /= 255
 X = np.repeat(X[..., np.newaxis], 3, -1)
 predictions4 = mod.predict(np.array(X), verbose=1)
 gc.collect()
-
-#concatenate all the predictions in the same vector
+print("TEST IMAGES PROCESSED")
+# concatenate all the predictions in the same vector
+print("PREPARING PREDICTIONS")
 predictions = np.concatenate((predictions1, predictions2), axis=0)
 predictions = np.concatenate((predictions, predictions3), axis=0)
 predictions = np.concatenate((predictions, predictions4), axis=0)
 gc.collect()
-
-
-#choose predictions with highest probability. For each value I choose, I set the probability to zero, so it can't be picked again.
+print("PREDICTIONS PROCESSED")
+# choose predictions with highest probability. For each value I choose, I set the probability to zero, so it can't be picked again.
 
 
 copy_pred = np.copy(predictions)
 idx = np.argmax(copy_pred, axis=1)
-copy_pred[:,idx] = 0
+copy_pred[:, idx] = 0
 idx2 = np.argmax(copy_pred, axis=1)
 copy_pred[:, idx2] = 0
 idx3 = np.argmax(copy_pred, axis=1)
@@ -234,7 +234,7 @@ idx4 = np.argmax(copy_pred, axis=1)
 copy_pred[:, idx4] = 0
 idx5 = np.argmax(copy_pred, axis=1)
 
-#convert the one-hot vectors to their names
+# convert the one-hot vectors to their names
 results = []
 
 print(idx[0:10])
@@ -242,40 +242,49 @@ print(idx2[0:10])
 print(idx3[0:10])
 print(idx4[0:10])
 print(idx5[0:10])
-threshold = 0.05 #threshold - only consider answers with a probability higher than it
+threshold = 0.05  # threshold - only consider answers with a probability higher than it
 for i in range(0, predictions.shape[0]):
-#for i in range(0, 10):
+    # for i in range(0, 10):
     each = np.zeros((4251, 1))
     each2 = np.zeros((4251, 1))
     each3 = np.zeros((4251, 1))
     each4 = np.zeros((4251, 1))
     each5 = np.zeros((4251, 1))
-    if((predictions[i, idx5[i]] > threshold)):
+    if ((predictions[i, idx5[i]] > threshold)):
         each5[idx5[i]] = 1
         each4[idx4[i]] = 1
         each3[idx3[i]] = 1
         each2[idx2[i]] = 1
         each[idx[i]] = 1
-        tags = [label_encoder.inverse_transform([argmax(each)])[0], label_encoder.inverse_transform([argmax(each2)])[0], label_encoder.inverse_transform([argmax(each3)])[0], label_encoder.inverse_transform([argmax(each4)])[0], label_encoder.inverse_transform([argmax(each5)])[0]]
+        tags = [label_encoder.inverse_transform([argmax(each)])[0], label_encoder.inverse_transform([argmax(each2)])[0],
+                label_encoder.inverse_transform([argmax(each3)])[0],
+                label_encoder.inverse_transform([argmax(each4)])[0],
+                label_encoder.inverse_transform([argmax(each5)])[0]]
     else:
-        if((predictions[i, idx4[i]] > threshold)):
+        if ((predictions[i, idx4[i]] > threshold)):
             print(predictions[i, idx4[i]])
             each4[idx4[i]] = 1
             each3[idx3[i]] = 1
             each2[idx2[i]] = 1
             each[idx[i]] = 1
-            tags = [label_encoder.inverse_transform([argmax(each)])[0], label_encoder.inverse_transform([argmax(each2)])[0], label_encoder.inverse_transform([argmax(each3)])[0], label_encoder.inverse_transform([argmax(each4)])[0]]
+            tags = [label_encoder.inverse_transform([argmax(each)])[0],
+                    label_encoder.inverse_transform([argmax(each2)])[0],
+                    label_encoder.inverse_transform([argmax(each3)])[0],
+                    label_encoder.inverse_transform([argmax(each4)])[0]]
         else:
-            if((predictions[i, idx3[i]] > threshold)):
+            if ((predictions[i, idx3[i]] > threshold)):
                 each3[idx3[i]] = 1
                 each2[idx2[i]] = 1
                 each[idx[i]] = 1
-                tags = [label_encoder.inverse_transform([argmax(each)])[0], label_encoder.inverse_transform([argmax(each2)])[0], label_encoder.inverse_transform([argmax(each3)])[0]]
+                tags = [label_encoder.inverse_transform([argmax(each)])[0],
+                        label_encoder.inverse_transform([argmax(each2)])[0],
+                        label_encoder.inverse_transform([argmax(each3)])[0]]
             else:
-                if((predictions[i, idx2[i]] > threshold)):
+                if ((predictions[i, idx2[i]] > threshold)):
                     each2[idx2[i]] = 1
                     each[idx[i]] = 1
-                    tags = [label_encoder.inverse_transform([argmax(each)])[0], label_encoder.inverse_transform([argmax(each2)])[0]]
+                    tags = [label_encoder.inverse_transform([argmax(each)])[0],
+                            label_encoder.inverse_transform([argmax(each2)])[0]]
                 else:
                     each[idx[i]] = 1
                     tags = label_encoder.inverse_transform([argmax(each)])[0]
