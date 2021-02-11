@@ -128,16 +128,16 @@ X_train = prepareImages(trainData, 100, PATH + "/train")
 X_train = np.repeat(X_train[..., np.newaxis], 3, -1)
 print("INIT X_TRAIN AND Y_TRAIN")
 # BOUCLE
-for i in tqdm(range(9)):
+#for i in tqdm(range(9)):
     # Preparation des images
-    X = prepareImages(trainData, 9850, PATH + "/train")
-    X = np.repeat(X[..., np.newaxis], 3, -1)
+#    X = prepareImages(trainData, 9850, PATH + "/train")
+#    X = np.repeat(X[..., np.newaxis], 3, -1)
     # Concatenation des images
-    X_train = np.concatenate((X_train, X))
+#    X_train = np.concatenate((X_train, X))
 
     # Concatenation des Y
-    Y_train_onehot = np.concatenate((Y_train_onehot, y_onehot))
-    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
+#    Y_train_onehot = np.concatenate((Y_train_onehot, y_onehot))
+#    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
 baseModel = keras.applications.ResNet50(weights="imagenet", include_top=False,
