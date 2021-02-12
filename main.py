@@ -71,7 +71,7 @@ def prepareImages(data, m, dataset, image_size=200):
             img = ImageOps.grayscale(img)
 
             # Enregistrement dans X_train
-            img = keras.applications.resnet.preprocess_input(np.array(img))
+            img = keras.applications.vgg19.preprocess_input(np.array(img))
             X_train[count] = img
 
             # Suivi
@@ -133,7 +133,7 @@ print("INIT X_TRAIN AND Y_TRAIN")
 #    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
-baseModel = keras.applications.ResNet50(weights="imagenet", include_top=False,
+baseModel = keras.applications.VGG19(weights="imagenet", include_top=False,
                                         input_tensor=keras.layers.Input(shape=(200, 200, 3)))
 for layer in baseModel.layers:
     layer.trainable = False
@@ -159,7 +159,7 @@ mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy']
 print("NEURAL NETWORK INITIALIZED")
 
 history = mod.fit(X_train, Y_train_onehot, epochs=100, batch_size=100, verbose=1)
-mod.save("model.hdf5")
+mod.save("model_vgg19.hdf5")
 print("NEURAL NETWORK TRAINED")
 # open test data
 test = os.listdir(PATH + "/test/")
@@ -276,7 +276,7 @@ for i in range(0, predictions.shape[0]):
     results.append(tags)
 
 # write the predictions in a file to be submitted in the competition.
-myfile = open('output.csv', 'w')
+myfile = open('output_vgg19.csv', 'w')
 
 column = ['Image', 'Id']
 
