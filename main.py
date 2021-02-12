@@ -15,7 +15,6 @@ from keras import optimizers
 
 from PIL import Image, ImageFilter, ImageOps
 
-
 PATH = "/home/data/challenge_deep"
 
 # load the training data
@@ -46,7 +45,7 @@ def prepareImages(data, m, dataset, image_size=200):
             ## FILTRES
 
             # Resize
-            img = img.resize((200,200))
+            img = img.resize((200, 200))
             # Flou bilatéral
             img = img.filter(ImageFilter.SMOOTH)
             # Netteté
@@ -71,7 +70,7 @@ def prepareImages(data, m, dataset, image_size=200):
             img = ImageOps.grayscale(img)
 
             # Enregistrement dans X_train
-            img = keras.applications.resnet.preprocess_input(np.array(img))
+            img = keras.applications.vgg16.preprocess_input(np.array(img))
             X_train[count] = img
 
             # Suivi
@@ -121,20 +120,20 @@ X_train = prepareImages(trainData, 9850, PATH + "/train")
 X_train = np.repeat(X_train[..., np.newaxis], 3, -1)
 print("INIT X_TRAIN AND Y_TRAIN")
 # BOUCLE
-#for i in tqdm(range(9)):
-    # Preparation des images
+# for i in tqdm(range(9)):
+# Preparation des images
 #    X = prepareImages(trainData, 9850, PATH + "/train")
 #    X = np.repeat(X[..., np.newaxis], 3, -1)
-    # Concatenation des images
+# Concatenation des images
 #    X_train = np.concatenate((X_train, X))
 
-    # Concatenation des Y
+# Concatenation des Y
 #    Y_train_onehot = np.concatenate((Y_train_onehot, y_onehot))
 #    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
-baseModel = keras.applications.ResNet50(weights="imagenet", include_top=False,
-                                        input_tensor=keras.layers.Input(shape=(200, 200, 3)))
+baseModel = keras.applications.VGG16(weights="imagenet", include_top=False,
+                                     input_tensor=keras.layers.Input(shape=(200, 200, 3)))
 for layer in baseModel.layers:
     layer.trainable = False
 mod = baseModel.output
@@ -159,7 +158,7 @@ mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy']
 print("NEURAL NETWORK INITIALIZED")
 
 history = mod.fit(X_train, Y_train_onehot, epochs=100, batch_size=100, verbose=1)
-mod.save("model.hdf5")
+mod.save("model_vgg16.hdf5")
 print("NEURAL NETWORK TRAINED")
 # open test data
 test = os.listdir(PATH + "/test/")
@@ -276,7 +275,7 @@ for i in range(0, predictions.shape[0]):
     results.append(tags)
 
 # write the predictions in a file to be submitted in the competition.
-myfile = open('output.csv', 'w')
+myfile = open('output_vgg16.csv', 'w')
 
 column = ['Image', 'Id']
 
