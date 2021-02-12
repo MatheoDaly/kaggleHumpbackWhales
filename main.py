@@ -32,7 +32,7 @@ def zoom_at(img, zoom, x=100, y=100):
     return final_image
 
 
-def prepareImages(data, m, dataset, image_size=200):
+def prepareImages(data, m, dataset, image_size=224):
     X_train = np.zeros((m, image_size, image_size))
 
     count = 0
@@ -45,7 +45,7 @@ def prepareImages(data, m, dataset, image_size=200):
             ## FILTRES
 
             # Resize
-            img = img.resize((200, 200))
+            img = img.resize((224, 224))
             # Flou bilatéral
             img = img.filter(ImageFilter.SMOOTH)
             # Netteté
@@ -132,8 +132,7 @@ print("INIT X_TRAIN AND Y_TRAIN")
 #    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
-baseModel = keras.applications.VGG16(weights="imagenet", include_top=False,
-                                     input_tensor=keras.layers.Input(shape=(200, 200, 3)))
+baseModel = keras.applications.VGG16(weights="imagenet")
 for layer in baseModel.layers:
     layer.trainable = False
 headModel = baseModel.output
