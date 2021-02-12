@@ -138,24 +138,24 @@ for layer in baseModel.layers:
     layer.trainable = False
 headModel = baseModel.output
 
-#headModel = keras.layers.BatchNormalization(axis=3, name='bn0')(headModel)
-#headModel = keras.layers.Activation('relu')(headModel)
+headModel = keras.layers.BatchNormalization(axis=3, name='bn0')(headModel)
+headModel = keras.layers.Activation('relu')(headModel)
 
-#headModel = keras.layers.MaxPooling2D((2, 2), name='out_max_pool')(headModel)
-#headModel = keras.layers.Conv2D(64, (2, 2), strides=(1, 1), name="out_conv1")(headModel)
-#headModel = keras.layers.Activation('relu')(headModel)
-#headModel = keras.layers.AveragePooling2D((1, 1), name='out_avg_pool')(headModel)
+headModel = keras.layers.MaxPooling2D((2, 2), name='out_max_pool')(headModel)
+headModel = keras.layers.Conv2D(64, (2, 2), strides=(1, 1), name="out_conv1")(headModel)
+headModel = keras.layers.Activation('relu')(headModel)
+headModel = keras.layers.AveragePooling2D((1, 1), name='out_avg_pool')(headModel)
 
-#headModel = keras.layers.Flatten()(headModel)
-#headModel = keras.layers.Dense(500, activation="relu", name='out_relu')(headModel)
-#headModel = keras.layers.Dropout(0.8)(headModel)
-#headModel = keras.layers.Dense(4251, activation='softmax', name='out_softmax')(headModel)
+headModel = keras.layers.Flatten()(headModel)
+headModel = keras.layers.Dense(500, activation="relu", name='out_relu')(headModel)
+headModel = keras.layers.Dropout(0.8)(headModel)
+headModel = keras.layers.Dense(4251, activation='softmax', name='out_softmax')(headModel)
 
-headModel = keras.layers.AveragePooling2D(pool_size=(6, 6))(headModel)
-headModel = keras.layers.Flatten(name="flatten")(headModel)
-headModel = keras.layers.Dense(256, activation="relu")(headModel)
-headModel = keras.layers.Dropout(0.5)(headModel)
-headModel = keras.layers.Dense(4251, activation="softmax")(headModel)
+# headModel = keras.layers.AveragePooling2D(pool_size=(6, 6))(headModel)
+# headModel = keras.layers.Flatten(name="flatten")(headModel)
+# headModel = keras.layers.Dense(256, activation="relu")(headModel)
+# headModel = keras.layers.Dropout(0.5)(headModel)
+# headModel = keras.layers.Dense(4251, activation="softmax")(headModel)
 mod = Model(inputs=baseModel.input, outputs=headModel)
 for layer in baseModel.layers:
     layer.trainable = False
