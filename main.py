@@ -163,7 +163,7 @@ for layer in baseModel.layers:
 mod.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 print("NEURAL NETWORK INITIALIZED")
 
-history = mod.fit(X_train, Y_train_onehot, epochs=20, batch_size=100, verbose=1)
+history = mod.fit(X_train, Y_train_onehot, epochs=100, verbose=1)
 mod.save("model_vgg19.hdf5")
 print("NEURAL NETWORK TRAINED")
 # open test data
