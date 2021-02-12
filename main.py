@@ -15,7 +15,6 @@ from keras import optimizers
 
 from PIL import Image, ImageFilter, ImageOps
 
-
 PATH = "/home/data/challenge_deep"
 
 # load the training data
@@ -46,7 +45,7 @@ def prepareImages(data, m, dataset, image_size=200):
             ## FILTRES
 
             # Resize
-            img = img.resize((200,200))
+            img = img.resize((200, 200))
             # Flou bilatéral
             img = img.filter(ImageFilter.SMOOTH)
             # Netteté
@@ -121,38 +120,38 @@ X_train = prepareImages(trainData, 9850, PATH + "/train")
 X_train = np.repeat(X_train[..., np.newaxis], 3, -1)
 print("INIT X_TRAIN AND Y_TRAIN")
 # BOUCLE
-#for i in tqdm(range(9)):
-    # Preparation des images
+# for i in tqdm(range(9)):
+# Preparation des images
 #    X = prepareImages(trainData, 9850, PATH + "/train")
 #    X = np.repeat(X[..., np.newaxis], 3, -1)
-    # Concatenation des images
+# Concatenation des images
 #    X_train = np.concatenate((X_train, X))
 
-    # Concatenation des Y
+# Concatenation des Y
 #    Y_train_onehot = np.concatenate((Y_train_onehot, y_onehot))
 #    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
 baseModel = keras.applications.VGG19(weights="imagenet", include_top=False,
-                                        input_tensor=keras.layers.Input(shape=(200, 200, 3)))
+                                     input_tensor=keras.layers.Input(shape=(200, 200, 3)))
 for layer in baseModel.layers:
     layer.trainable = False
-mod = baseModel.output
+headModel = baseModel.output
 
-mod = keras.layers.BatchNormalization(axis=3, name='bn0')(mod)
-mod = keras.layers.Activation('relu')(mod)
+headModel = keras.layers.BatchNormalization(axis=3, name='bn0')(headModel)
+headModel = keras.layers.Activation('relu')(headModel)
 
-mod = keras.layers.MaxPooling2D((2, 2), name='out_max_pool')(mod)
-mod = keras.layers.Conv2D(64, (2, 2), strides=(1, 1), name="out_conv1")(mod)
-mod = keras.layers.Activation('relu')(mod)
-mod = keras.layers.AveragePooling2D((1, 1), name='out_avg_pool')(mod)
+headModel = keras.layers.MaxPooling2D((2, 2), name='out_max_pool')(headModel)
+headModel = keras.layers.Conv2D(64, (2, 2), strides=(1, 1), name="out_conv1")(headModel)
+headModel = keras.layers.Activation('relu')(headModel)
+headModel = keras.layers.AveragePooling2D((1, 1), name='out_avg_pool')(headModel)
 
-mod = keras.layers.Flatten()(mod)
-mod = keras.layers.Dense(500, activation="relu", name='out_relu')(mod)
-mod = keras.layers.Dropout(0.8)(mod)
-mod = keras.layers.Dense(4251, activation='softmax', name='out_softmax')(mod)
+headModel = keras.layers.Flatten()(headModel)
+headModel = keras.layers.Dense(500, activation="relu", name='out_relu')(headModel)
+headModel = keras.layers.Dropout(0.8)(headModel)
+headModel = keras.layers.Dense(4251, activation='softmax', name='out_softmax')(headModel)
 
-mod = Model(inputs=baseModel.input, outputs=mod)
+mod = Model(inputs=baseModel.input, outputs=headModel)
 opt = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=0.0000001, decay=0.0, amsgrad=False)
 
 mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
