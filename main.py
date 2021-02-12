@@ -151,7 +151,7 @@ headModel = baseModel.output
 #headModel = keras.layers.Dropout(0.8)(headModel)
 #headModel = keras.layers.Dense(4251, activation='softmax', name='out_softmax')(headModel)
 
-headModel = keras.layers.AveragePooling2D(pool_size=(7, 7))(headModel)
+headModel = keras.layers.AveragePooling2D(pool_size=(6, 6))(headModel)
 headModel = keras.layers.Flatten(name="flatten")(headModel)
 headModel = keras.layers.Dense(256, activation="relu")(headModel)
 headModel = keras.layers.Dropout(0.5)(headModel)
