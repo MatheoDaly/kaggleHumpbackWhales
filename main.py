@@ -132,7 +132,8 @@ print("INIT X_TRAIN AND Y_TRAIN")
 #    Y_train_integer = np.concatenate((Y_train_integer, y_integer))
 
 print("X_TRAIN AND Y_TRAIN PROCESSED")
-baseModel = keras.applications.VGG16(weights="imagenet")
+baseModel = keras.applications.VGG16(weights="imagenet", include_top=False,
+                                     input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 for layer in baseModel.layers:
     layer.trainable = False
 headModel = baseModel.output
