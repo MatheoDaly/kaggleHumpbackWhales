@@ -152,9 +152,10 @@ headModel = keras.layers.Dropout(0.8)(headModel)
 headModel = keras.layers.Dense(4251, activation='softmax', name='out_softmax')(headModel)
 
 mod = Model(inputs=baseModel.input, outputs=headModel)
-opt = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=0.0000001, decay=0.0, amsgrad=False)
+for layer in baseModel.layers:
+    layer.trainable = False
 
-mod.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+mod.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 print("NEURAL NETWORK INITIALIZED")
 
 history = mod.fit(X_train, Y_train_onehot, epochs=100, batch_size=100, verbose=1)
